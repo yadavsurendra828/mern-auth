@@ -1,0 +1,55 @@
+version: "3.8"
+services:
+  client-webapp:
+    image: client-webapp
+    stdin_open: true
+    ports:
+      - "3000:3000"
+    build:
+      context: ./client-webapp
+    tty: true
+    volumes:
+      - ./client-webapp:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - brown-ohaver-server
+    networks:
+      - mern-app
+    links:
+      - brown-ohaver-server
+
+  brown-ohaver-server:
+    image: brown-ohaver-server
+    depends_on:
+      - mongo
+    links:
+      - mongo
+    ports:
+      - "8000:8000"
+    build:
+      context: ./brown-ohaver-server
+    volumes:
+      - ./brown-ohaver-server:/usr/src/app
+      - /usr/src/app/node_modules
+
+  mongo:
+    restart: always
+    image: mongo:3.6.19-xenial
+    expose:
+      - 27017
+    ports:
+      - "27017:27017"
+    networks:
+      - mern-app
+    volumes:
+      # - ./mongo-data:/data/db
+      - /usr/src/app:/data/db
+# networks:
+#   mongo:
+#     name: mongo-url
+networks:
+  mern-app:
+    driver: bridge
+volumes:
+  mongo-data:
+    driver: local
